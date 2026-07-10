@@ -1,0 +1,22 @@
+# IDE
+.idea/
+.vscode/
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Flutter
+**/.dart_tool/
+**/build/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+
+# Android
+**/android/key.properties
+**/android/app/*.jks
+**/android/app/*.keystore
+
+# Firebase
+**/google-services.json
+**/GoogleService-Info.plist
