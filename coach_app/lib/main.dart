@@ -1,25 +1,10 @@
 import 'package:flutter/material.dart';
 
-import 'core/theme/app_theme.dart';
+import 'app/app.dart';
 
 void main() {
-  runApp(const CoachApp());
+  runApp(
+    const CoachApp(),
+  );
 }
 
-class CoachApp extends StatelessWidget {
-  const CoachApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Coach',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.light,
-      home: const Scaffold(
-        body: Center(
-          child: Text('Coach'),
-        ),
-      ),
-    );
-  }
-}
