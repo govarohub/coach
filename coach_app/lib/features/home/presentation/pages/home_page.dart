@@ -1,4 +1,4 @@
-    /*
+/*
 |--------------------------------------------------------------------------
 | Coach
 |--------------------------------------------------------------------------
@@ -7,8 +7,11 @@
 */
 
 import 'package:flutter/material.dart';
-
+import 'package:go_router/go_router.dart';
+import '../../../../app/router/app_routes.dart';
+import '../../../../core/auth/auth_guard.dart';
 import '../../../../shared/widgets/base_app_bar.dart';
+import '../../../../shared/widgets/base_button.dart';
 import '../../../../shared/widgets/base_scaffold.dart';
 
 class HomePage extends StatelessWidget {
@@ -18,14 +21,28 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const BaseScaffold(
-      appBar: BaseAppBar(
+    return BaseScaffold(
+      appBar: const BaseAppBar(
         title: 'Coach',
         showBackButton: false,
       ),
       body: Center(
-        child: Text(
-          'Pantalla principal',
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Pantalla principal',
+            ),
+            const SizedBox(height: 24),
+            BaseButton(
+              text: 'Cerrar sesión',
+              isOutlined: true,
+              onPressed: () {
+                AuthGuard.isAuthenticated = false;
+                context.go(AppRoutes.login);
+              },
+            ),
+          ],
         ),
       ),
     );
