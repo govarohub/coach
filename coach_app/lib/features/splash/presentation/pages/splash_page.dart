@@ -14,6 +14,8 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
 
+import '../../../../core/auth/auth_guard.dart';
+
 class SplashPage extends StatefulWidget {
   const SplashPage({
     super.key,
@@ -76,14 +78,7 @@ class _SplashPageState extends State<SplashPage>
 
     _controller.forward();
 
-    Future.delayed(
-      const Duration(seconds: 3),
-      () {
-        if (mounted) {
-          context.go(AppRoutes.login);
-        }
-      },
-    );
+    _navigate();
   }
 
   @override
@@ -92,6 +87,24 @@ class _SplashPageState extends State<SplashPage>
 
     super.dispose();
   }
+  
+  Future<void> _navigate() async {
+    await Future.delayed(
+      const Duration(seconds: 3),
+      );
+      
+      if (!mounted) {
+        return;
+        }
+        
+      if (AuthGuard.isAuthenticated) {
+        context.go(AppRoutes.home);
+        return;
+         }
+         
+    context.go(AppRoutes.login);
+    }
+
 
   @override
   Widget build(BuildContext context) {
