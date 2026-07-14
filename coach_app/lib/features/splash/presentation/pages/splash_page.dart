@@ -4,7 +4,7 @@
 |--------------------------------------------------------------------------
 | Archivo: splash_page.dart
 |--------------------------------------------------------------------------
-| Pantalla Splash profesional.
+| Splash profesional con animación del logotipo.
 |--------------------------------------------------------------------------
 */
 
@@ -23,10 +23,58 @@ class SplashPage extends StatefulWidget {
   State<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage> {
+class _SplashPageState extends State<SplashPage>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  late final Animation<double> _opacityAnimation;
+
+  late final Animation<double> _scaleAnimation;
+
+  late final Animation<Offset> _offsetAnimation;
+
   @override
   void initState() {
     super.initState();
+
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(
+        milliseconds: 1200,
+      ),
+    );
+
+    _opacityAnimation = Tween<double>(
+      begin: 0,
+      end: 1,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeOut,
+      ),
+    );
+
+    _scaleAnimation = Tween<double>(
+      begin: .85,
+      end: 1,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeOutBack,
+      ),
+    );
+
+    _offsetAnimation = Tween<Offset>(
+      begin: const Offset(0, .15),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Curves.easeOut,
+      ),
+    );
+
+    _controller.forward();
 
     Future.delayed(
       const Duration(seconds: 3),
@@ -39,6 +87,13 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   @override
+  void dispose() {
+    _controller.dispose();
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primary,
@@ -46,55 +101,32 @@ class _SplashPageState extends State<SplashPage> {
         child: Center(
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  width: 130,
-                  height: 130,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(32),
-                  ),
-                  alignment: Alignment.center,
-                  child: const Icon(
-                    Icons.fitness_center,
-                    size: 70,
-                    color: AppColors.primary,
-                  ),
-                ),
-
-                const SizedBox(height: 40),
-
-                Text(
-                  'Coach',
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+            child: FadeTransition(
+              opacity: _opacityAnimation,
+              child: SlideTransition(
+                position: _offsetAnimation,
+                child: ScaleTransition(
+                  scale: _scaleAnimation,
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Image.asset(
+                        'assets/images/logo/coach_logo_white.png',
+                        width: 210,
                       ),
-                ),
-
-                const SizedBox(height: 12),
-
-                Text(
-                  'Entrena. Reserva. Evoluciona.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: Colors.white70,
+                      const SizedBox(height: 48),
+                      const SizedBox(
+                        width: 34,
+                        height: 34,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          color: Colors.white,
+                        ),
                       ),
-                ),
-
-                const SizedBox(height: 60),
-
-                const SizedBox(
-                  width: 34,
-                  height: 34,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 3,
-                    color: Colors.white,
+                    ],
                   ),
                 ),
-              ],
+              ),
             ),
           ),
         ),
