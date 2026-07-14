@@ -35,6 +35,10 @@ class _SplashPageState extends State<SplashPage>
 
   late final Animation<Offset> _offsetAnimation;
 
+  static const Duration _splashDuration = Duration(
+    seconds: 3,
+  );
+
   @override
   void initState() {
     super.initState();
@@ -90,20 +94,25 @@ class _SplashPageState extends State<SplashPage>
   
   Future<void> _navigate() async {
     await Future.delayed(
-      const Duration(seconds: 3),
-      );
-      
-      if (!mounted) {
-        return;
-        }
-        
-      if (AuthGuard.isAuthenticated) {
-        context.go(AppRoutes.home);
-        return;
-         }
-         
-    context.go(AppRoutes.login);
+      _splashDuration,
+    );
+    
+    if (!mounted) {
+      return;
     }
+    
+    context.go(
+      _nextRoute(),
+    );
+  }
+
+  String _nextRoute() {
+  if (AuthGuard.isAuthenticated) {
+    return AppRoutes.home;
+  }
+
+  return AppRoutes.login;
+}
 
 
   @override
