@@ -4,7 +4,7 @@
 |--------------------------------------------------------------------------
 | Archivo: app.dart
 |--------------------------------------------------------------------------
-| Widget principal de la aplicación.
+| Configuración principal de la aplicación.
 |--------------------------------------------------------------------------
 */
 
@@ -22,8 +22,11 @@ class CoachApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Coach',
+
       debugShowCheckedModeBanner: false,
+
       theme: AppTheme.light,
+
       routerConfig: appRouter,
     );
   }
