@@ -36,4 +36,8 @@ final class AuthService {
         password: password,
     );
   }
+
+  bool get isAuthenticated {
+    return _firebaseAuth.currentUser != null;
+    }
 }

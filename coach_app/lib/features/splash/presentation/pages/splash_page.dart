@@ -10,11 +10,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
 import '../../../../app/router/app_routes.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/auth/auth_service.dart';
 
-import '../../../../core/auth/auth_guard.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({
@@ -105,14 +104,15 @@ class _SplashPageState extends State<SplashPage>
       _nextRoute(),
     );
   }
-
+  
   String _nextRoute() {
-   if (AuthGuard.isAuthenticated) {
-     return AppRoutes.home;
-  }
-
+    final authService = AuthService();
+    
+    if (authService.isAuthenticated) {
+      return AppRoutes.home;
+      }
   return AppRoutes.login;
-}
+ }
 
 
   @override
