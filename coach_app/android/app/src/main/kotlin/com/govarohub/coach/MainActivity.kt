@@ -1,4 +1,4 @@
-package com.govarohub.coach_app
+package com.govarohub.coach
 
 import io.flutter.embedding.android.FlutterActivity
 

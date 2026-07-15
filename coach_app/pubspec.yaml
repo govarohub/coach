@@ -21,6 +21,7 @@ dependencies:
   connectivity_plus: ^6.1.5
   package_info_plus: ^8.3.1
   device_info_plus: ^11.5.0
+  firebase_core: ^4.0.0
 
 
 dev_dependencies:

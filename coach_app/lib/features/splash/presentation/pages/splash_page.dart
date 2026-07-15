@@ -107,8 +107,8 @@ class _SplashPageState extends State<SplashPage>
   }
 
   String _nextRoute() {
-  if (AuthGuard.isAuthenticated) {
-    return AppRoutes.home;
+   if (AuthGuard.isAuthenticated) {
+     return AppRoutes.home;
   }
 
   return AppRoutes.login;
