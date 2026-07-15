@@ -18,6 +18,8 @@ import '../../../../shared/widgets/base_button.dart';
 import '../../../../shared/widgets/base_scaffold.dart';
 import '../providers/login_provider.dart';
 
+import '../../../../core/auth/auth_exception_mapper.dart';
+
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({
     super.key,
@@ -59,15 +61,15 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       }
 
       context.go(AppRoutes.home);
-    } on FirebaseAuthException {
+    } on FirebaseAuthException catch (exception) {
       if (!mounted) {
         return;
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Correo o contraseña incorrectos.',
+            AuthExceptionMapper.message(exception),
           ),
         ),
       );

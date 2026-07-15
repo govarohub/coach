@@ -37,6 +37,45 @@ final class AuthService {
     );
   }
 
+  
+  Future<UserCredential> register({
+    required String email,
+    required String password,
+    }) async {
+      return _firebaseAuth.createUserWithEmailAndPassword(
+        email: email.trim(),
+        password: password,
+        );
+      }
+
+Future<void> sendPasswordReset({
+  required String email,
+  }) async {
+    await _firebaseAuth.sendPasswordResetEmail(
+      email: email.trim(),
+      );
+    }
+
+Future<void> sendEmailVerification() async {
+  final user = _firebaseAuth.currentUser;
+  
+  if (user == null) {
+    return;
+  }
+
+  if (!user.emailVerified) {
+    await user.sendEmailVerification();
+  }
+}
+
+Future<void> reloadUser() async {
+  await _firebaseAuth.currentUser?.reload();
+}
+
+bool get isEmailVerified {
+  return _firebaseAuth.currentUser?.emailVerified ?? false;
+}
+
   bool get isAuthenticated {
     return _firebaseAuth.currentUser != null;
     }
