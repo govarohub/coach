@@ -45,50 +45,57 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
     super.dispose();
   }
 
-  Future<void> _register() async {
-    if (!_formKey.currentState!.validate()) {
+ Future<void> _register() async {
+  if (!_formKey.currentState!.validate()) {
+    return;
+  }
+
+  final scaffoldMessenger = ScaffoldMessenger.of(context);
+  final goRouter = GoRouter.of(context);
+
+  ref.read(registerLoadingProvider.notifier).state = true;
+
+  try {
+    await ref.read(authServiceProvider).register(
+      email: _emailController.text,
+      password: _passwordController.text,
+    );
+
+    await ref.read(authServiceProvider).sendEmailVerification();
+
+    if (!mounted) {
       return;
     }
 
-    ref.read(registerLoadingProvider.notifier).state = true;
-
-    try {
-      await ref.read(authServiceProvider).register(
-            email: _emailController.text,
-            password: _passwordController.text,
-          );
-
-      await ref.read(authServiceProvider).sendEmailVerification();
-
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Cuenta creada. Revisa tu correo para verificarla.',
-          ),
+    scaffoldMessenger.showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Cuenta creada. Revisa tu correo para verificarla.',
         ),
-      );
+      ),
+    );
 
-      context.go(AppRoutes.login);
-    } on FirebaseAuthException catch (exception) {
-      if (!mounted) {
-        return;
-      }
+    goRouter.go(
+      AppRoutes.emailVerification,
+    );
+  } on FirebaseAuthException catch (exception) {
+    if (!mounted) {
+      return;
+    }
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AuthExceptionMapper.message(exception),
-          ),
+    scaffoldMessenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          AuthExceptionMapper.message(exception),
         ),
-      );
-    } finally {
+      ),
+    );
+  } finally {
+    if (mounted) {
       ref.read(registerLoadingProvider.notifier).state = false;
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {

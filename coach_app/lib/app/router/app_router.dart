@@ -15,6 +15,8 @@ import '../../features/authentication/presentation/pages/login_page.dart';
 import '../../features/authentication/presentation/pages/register_page.dart';
 import '../../features/home/presentation/pages/home_page.dart';
 import '../../core/auth/auth_guard.dart';
+import '../../features/authentication/presentation/pages/forgot_password_page.dart';
+import '../../features/authentication/presentation/pages/email_verification_page.dart';
 
 final GoRouter appRouter = GoRouter(
   debugLogDiagnostics: true,
@@ -29,7 +31,9 @@ final GoRouter appRouter = GoRouter(
     final bool isPublicRoute =
         location == AppRoutes.splash ||
         location == AppRoutes.login ||
-        location == AppRoutes.register;
+        location == AppRoutes.register ||
+        location == AppRoutes.forgotPassword ||
+        location == AppRoutes.emailVerification;
 
     if (!logged && !isPublicRoute) {
       return AppRoutes.login;
@@ -38,6 +42,8 @@ final GoRouter appRouter = GoRouter(
     if (logged &&
         (location == AppRoutes.login ||
             location == AppRoutes.register ||
+            location == AppRoutes.forgotPassword ||
+            location == AppRoutes.emailVerification ||
             location == AppRoutes.splash)) {
       return AppRoutes.home;
     }
@@ -65,5 +71,15 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.home,
       builder: (_, _) => const HomePage(),
     ),
+
+    GoRoute(
+      path: AppRoutes.forgotPassword,
+      builder: (_, _) => const ForgotPasswordPage(),
+      ),
+      
+    GoRoute(
+      path: AppRoutes.emailVerification,
+      builder: (_, _) => const EmailVerificationPage(),
+      ),
   ],
 );

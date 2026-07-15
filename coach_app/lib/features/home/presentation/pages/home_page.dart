@@ -9,18 +9,22 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../app/router/app_routes.dart';
-import '../../../../core/auth/auth_guard.dart';
 import '../../../../shared/widgets/base_app_bar.dart';
 import '../../../../shared/widgets/base_button.dart';
 import '../../../../shared/widgets/base_scaffold.dart';
+import '../../../../core/auth/auth_provider.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends ConsumerWidget {
   const HomePage({
     super.key,
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(
+    BuildContext context, 
+    WidgetRef ref,
+    ) {
     return BaseScaffold(
       appBar: const BaseAppBar(
         title: 'Coach',
@@ -37,11 +41,16 @@ class HomePage extends StatelessWidget {
             BaseButton(
               text: 'Cerrar sesión',
               isOutlined: true,
-              onPressed: () {
-                AuthGuard.isAuthenticated = false;
+              onPressed: () async {
+                await ref.read(authServiceProvider).signOut();
+                
+                if (!context.mounted) {
+                  return;
+                }
+                
                 context.go(AppRoutes.login);
-              },
-            ),
+                },
+              ),
           ],
         ),
       ),
