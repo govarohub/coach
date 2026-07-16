@@ -12,7 +12,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/app_routes.dart';
-import '../../../../core/auth/auth_exception_mapper.dart';
 import '../../../../core/auth/auth_provider.dart';
 import '../../../../shared/widgets/base_app_bar.dart';
 import '../../../../shared/widgets/base_button.dart';
@@ -60,9 +59,7 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       email: _emailController.text,
       password: _passwordController.text,
     );
-
     await ref.read(authServiceProvider).sendEmailVerification();
-
     if (!mounted) {
       return;
     }
@@ -79,17 +76,33 @@ class _RegisterPageState extends ConsumerState<RegisterPage> {
       AppRoutes.emailVerification,
     );
   } on FirebaseAuthException catch (exception) {
+
+    debugPrint('==============================');
+    debugPrint('Firebase code    : ${exception.code}');
+    debugPrint('Firebase message : ${exception.message}');
+    debugPrint('==============================');
+
     if (!mounted) {
       return;
     }
 
-    scaffoldMessenger.showSnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
+        duration: const Duration(seconds: 10),
         content: Text(
-          AuthExceptionMapper.message(exception),
+          'Code: ${exception.code}\n${exception.message}',
         ),
       ),
     );
+  } catch (exception, stackTrace) {
+
+    debugPrint('==============================');
+    debugPrint(exception.toString());
+    debugPrint(stackTrace.toString());
+    debugPrint('==============================');
+
+    rethrow;
+
   } finally {
     if (mounted) {
       ref.read(registerLoadingProvider.notifier).state = false;

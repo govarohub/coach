@@ -13,6 +13,8 @@ import 'package:flutter/material.dart';
 
 import '../../core/theme/app_colors.dart';
 
+import 'package:go_router/go_router.dart';
+
 class BaseAppBar extends StatelessWidget implements PreferredSizeWidget {
   const BaseAppBar({
     required this.title,
@@ -64,7 +66,7 @@ class BaseAppBar extends StatelessWidget implements PreferredSizeWidget {
           (showBackButton && Navigator.of(context).canPop()
               ? IconButton(
                   icon: const Icon(Icons.arrow_back_ios_new_rounded),
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () => context.pop(),
                 )
               : null),
     );

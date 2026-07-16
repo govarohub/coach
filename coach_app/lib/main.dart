@@ -7,9 +7,9 @@
 */
 
 import 'package:flutter/material.dart';
-
 import 'app/app.dart';
 import 'core/bootstrap/app_bootstrap.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,6 +17,9 @@ Future<void> main() async {
   await AppBootstrap.initialize();
 
   runApp(
-    const CoachApp(),
+    const ProviderScope(
+      child: CoachApp(),
+      ),
   );
+
 }

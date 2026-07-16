@@ -9,6 +9,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../../core/auth/auth_exception_mapper.dart';
 import '../../../../core/auth/auth_provider.dart';
@@ -40,46 +41,66 @@ class _ForgotPasswordPageState
   }
 
   Future<void> _sendEmail() async {
-    if (!_formKey.currentState!.validate()) {
+  if (!_formKey.currentState!.validate()) {
+    return;
+  }
+
+  final messenger = ScaffoldMessenger.of(context);
+  
+
+  ref.read(forgotPasswordLoadingProvider.notifier).state = true;
+
+  try {
+    await ref.read(authServiceProvider).sendPasswordReset(
+      email: _emailController.text.trim(),
+    );
+
+    if (!mounted) {
       return;
     }
 
-    ref.read(forgotPasswordLoadingProvider.notifier).state = true;
-
-    try {
-      await ref.read(authServiceProvider).sendPasswordReset(
-            email: _emailController.text,
-          );
-
-      if (!mounted) {
-        return;
-      }
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Se envió un correo para restablecer tu contraseña.',
-          ),
+    messenger.showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Se envió un correo para restablecer tu contraseña.',
         ),
-      );
+        duration: Duration(seconds: 2),
+      ),
+    );
 
-      Navigator.of(context).pop();
-    } on FirebaseAuthException catch (exception) {
-      if (!mounted) {
-        return;
-      }
+    await Future.delayed(
+      const Duration(seconds: 2),
+    );
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            AuthExceptionMapper.message(exception),
-          ),
+    if (!mounted) {
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        context.pop();
+        }
+      });
+
+  } on FirebaseAuthException catch (exception) {
+    if (!mounted) {
+      return;
+    }
+
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(
+          AuthExceptionMapper.message(exception),
         ),
-      );
-    } finally {
+      ),
+    );
+
+  } finally {
+    if (mounted) {
       ref.read(forgotPasswordLoadingProvider.notifier).state = false;
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {
