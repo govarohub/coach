@@ -8,12 +8,16 @@
 
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../firestore/firestore_service.dart';
+
 final class AuthService {
   AuthService({
     FirebaseAuth? firebaseAuth,
   }) : _firebaseAuth = firebaseAuth ?? FirebaseAuth.instance;
 
   final FirebaseAuth _firebaseAuth;
+
+  final FirestoreService _firestoreService = FirestoreService();
 
   Stream<User?> authStateChanges() {
     return _firebaseAuth.authStateChanges();
@@ -37,16 +41,27 @@ final class AuthService {
     );
   }
 
-  
   Future<UserCredential> register({
     required String email,
     required String password,
-    }) async {
-      return _firebaseAuth.createUserWithEmailAndPassword(
-        email: email.trim(),
-        password: password,
-        );
-      }
+  }) async {
+    final credential =
+    await _firebaseAuth.createUserWithEmailAndPassword(
+      email: email.trim(),
+      password: password,
+    );
+
+    final user = credential.user;
+
+    if (user != null) {
+      await _firestoreService.createUser(
+        uid: user.uid,
+        email: user.email ?? email.trim(),
+      );
+    }
+
+    return credential;
+  }
 
 Future<void> sendPasswordReset({
   required String email,
@@ -58,7 +73,7 @@ Future<void> sendPasswordReset({
 
 Future<void> sendEmailVerification() async {
   final user = _firebaseAuth.currentUser;
-  
+
   if (user == null) {
     return;
   }
