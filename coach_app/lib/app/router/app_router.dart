@@ -17,38 +17,58 @@ import '../../features/home/presentation/pages/home_page.dart';
 import '../../core/auth/auth_guard.dart';
 import '../../features/authentication/presentation/pages/forgot_password_page.dart';
 import '../../features/authentication/presentation/pages/email_verification_page.dart';
+import '../../core/auth/session_state.dart';
 
 final GoRouter appRouter = GoRouter(
   debugLogDiagnostics: true,
 
   initialLocation: AppRoutes.splash,
 
-  redirect: (context, state) {
-    final bool logged = AuthGuard.isAuthenticated;
+  redirect: (context, state) async {
+    final sessionState = await AuthGuard.sessionState();
 
     final String location = state.matchedLocation;
 
-    final bool isPublicRoute =
-        location == AppRoutes.splash ||
-        location == AppRoutes.login ||
-        location == AppRoutes.register ||
-        location == AppRoutes.forgotPassword ||
-        location == AppRoutes.emailVerification;
+    switch (sessionState) {
+      case SessionState.loading:
+        return location == AppRoutes.splash
+            ? null
+            : AppRoutes.splash;
 
-    if (!logged && !isPublicRoute) {
-      return AppRoutes.login;
-    }
+      case SessionState.unauthenticated:
+        final bool isPublicRoute =
+            location == AppRoutes.splash ||
+                location == AppRoutes.login ||
+                location == AppRoutes.register ||
+                location == AppRoutes.forgotPassword;
 
-    if (logged &&
-        (location == AppRoutes.login ||
+        return isPublicRoute ? null : AppRoutes.login;
+
+      case SessionState.emailNotVerified:
+        return location == AppRoutes.emailVerification
+            ? null
+            : AppRoutes.emailVerification;
+
+      case SessionState.profileIncomplete:
+      // Temporalmente se permitirá Home hasta crear
+      // CompleteProfilePage en el siguiente capítulo.
+        return location == AppRoutes.home
+            ? null
+            : AppRoutes.home;
+
+      case SessionState.authenticated:
+        if (location == AppRoutes.login ||
             location == AppRoutes.register ||
             location == AppRoutes.forgotPassword ||
             location == AppRoutes.emailVerification ||
-            location == AppRoutes.splash)) {
-      return AppRoutes.home;
-    }
+            location == AppRoutes.splash) {
+          return AppRoutes.home;
+        }
+        return null;
 
-    return null;
+      case SessionState.disabled:
+        return AppRoutes.login;
+    }
   },
 
   routes: <RouteBase>[
@@ -76,7 +96,7 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.forgotPassword,
       builder: (_, _) => const ForgotPasswordPage(),
       ),
-      
+
     GoRoute(
       path: AppRoutes.emailVerification,
       builder: (_, _) => const EmailVerificationPage(),

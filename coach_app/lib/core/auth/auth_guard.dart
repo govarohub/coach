@@ -4,16 +4,20 @@
 |--------------------------------------------------------------------------
 | Archivo: auth_guard.dart
 |--------------------------------------------------------------------------
-| Adaptador del estado de autenticación basado en Firebase.
+| Utilidades para validar el estado de la sesión.
 |--------------------------------------------------------------------------
 */
 
-import 'auth_service.dart';
+import 'session_manager.dart';
+import 'session_state.dart';
 
 final class AuthGuard {
   AuthGuard._();
 
-  static bool get isAuthenticated {
-    return AuthService().isAuthenticated;
+  static final SessionManager _sessionManager = SessionManager();
+
+  /// Devuelve el estado completo de la sesión.
+  static Future<SessionState> sessionState() {
+    return _sessionManager.currentSessionState();
   }
 }

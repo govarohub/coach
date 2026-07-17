@@ -39,7 +39,7 @@ class EmailVerificationPage extends ConsumerWidget {
     }
 
     if (verified) {
-      context.go(AppRoutes.home);
+      context.go(AppRoutes.splash);
       return;
     }
 

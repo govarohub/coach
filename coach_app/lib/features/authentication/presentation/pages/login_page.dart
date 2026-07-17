@@ -55,19 +55,29 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     ref.read(loginLoadingProvider.notifier).state = true;
 
     try {
-      await ref.read(authServiceProvider).signIn(
-            email: _emailController.text.trim(),
-            password: _passwordController.text,
-          );
+      debugPrint('=== LOGIN INICIO ===');
+
+      final credential = await ref.read(authServiceProvider).signIn(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      debugPrint('UID: ${credential.user?.uid}');
+      debugPrint('EMAIL VERIFIED: ${credential.user?.emailVerified}');
 
       if (!mounted) {
         return;
       }
 
-      router.go(
-        AppRoutes.home,
-      );
+      debugPrint('NAVEGANDO A HOME');
+
+      router.go(AppRoutes.home);
+
+      debugPrint('router.go ejecutado');
     } on FirebaseAuthException catch (exception) {
+      debugPrint('FIREBASE ERROR: ${exception.code}');
+      debugPrint(exception.message);
+
       if (!mounted) {
         return;
       }
@@ -79,10 +89,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
           ),
         ),
       );
+    } catch (e, s) {
+      debugPrint('ERROR NO CONTROLADO');
+      debugPrint(e.toString());
+      debugPrint(s.toString());
     } finally {
       if (mounted) {
         ref.read(loginLoadingProvider.notifier).state = false;
       }
+
+      debugPrint('=== LOGIN FIN ===');
     }
   }
 
