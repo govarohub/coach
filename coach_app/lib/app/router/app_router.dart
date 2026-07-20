@@ -17,6 +17,7 @@ import '../../features/home/presentation/pages/home_page.dart';
 import '../../core/auth/auth_guard.dart';
 import '../../features/authentication/presentation/pages/forgot_password_page.dart';
 import '../../features/authentication/presentation/pages/email_verification_page.dart';
+import '../../features/authentication/presentation/pages/disabled_account_page.dart';
 import '../../core/auth/session_state.dart';
 
 final GoRouter appRouter = GoRouter(
@@ -67,7 +68,9 @@ final GoRouter appRouter = GoRouter(
         return null;
 
       case SessionState.disabled:
-        return AppRoutes.login;
+        return location == AppRoutes.disabledAccount
+            ? null
+            : AppRoutes.disabledAccount;
     }
   },
 
@@ -101,5 +104,9 @@ final GoRouter appRouter = GoRouter(
       path: AppRoutes.emailVerification,
       builder: (_, _) => const EmailVerificationPage(),
       ),
+    GoRoute(
+      path: AppRoutes.disabledAccount,
+      builder: (_, _) => const DisabledAccountPage(),
+    ),
   ],
 );
