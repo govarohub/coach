@@ -43,4 +43,33 @@ final class Profile {
 
   /// Fecha de la última actualización del perfil.
   final DateTime updatedAt;
+
+  /// Indica si el nombre es válido.
+  bool get hasValidFirstName {
+    final value = firstName.trim();
+
+    return value.length >= 2;
+  }
+
+  /// Indica si el apellido es válido.
+  bool get hasValidLastName {
+    final value = lastName.trim();
+
+    return value.length >= 2;
+  }
+
+  /// Indica si el teléfono es válido.
+  bool get hasValidPhone {
+    final value = phone.trim();
+
+    return value.length >= 10;
+  }
+
+  /// Indica si el perfil es válido.
+  bool get isValid {
+    return hasValidFirstName &&
+        hasValidLastName &&
+        hasValidPhone;
+  }
+
 }
