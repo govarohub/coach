@@ -8,6 +8,8 @@
 |--------------------------------------------------------------------------
 */
 
+
+
 final class Profile {
   const Profile({
     required this.uid,
@@ -20,6 +22,18 @@ final class Profile {
     required this.updatedAt,
   });
 
+  factory Profile.fromMap(Map<String, dynamic> map) {
+    return Profile(
+      uid: map['uid'] as String,
+      email: map['email'] as String,
+      firstName: map['firstName'] as String,
+      lastName: map['lastName'] as String,
+      phone: map['phone'] as String,
+      isCoach: map['isCoach'] as bool,
+      createdAt: map['createdAt'] as DateTime,
+      updatedAt: map['updatedAt'] as DateTime,
+    );
+  }
   /// Identificador único del usuario en Firebase Authentication.
   final String uid;
 
@@ -72,4 +86,18 @@ final class Profile {
         hasValidPhone;
   }
 
+  /// Convierte el perfil a un mapa.
+  Map<String, dynamic> toMap() {
+    return {
+      'uid': uid,
+      'email': email,
+      'firstName': firstName,
+      'lastName': lastName,
+      'phone': phone,
+      'isCoach': isCoach,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+    };
+  }
 }
+
