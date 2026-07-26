@@ -20,6 +20,7 @@ final class Profile {
     required this.isCoach,
     required this.createdAt,
     required this.updatedAt,
+    this.photoUrl,
   });
 
   factory Profile.fromMap(Map<String, dynamic> map) {
@@ -30,6 +31,7 @@ final class Profile {
       lastName: map['lastName'] as String,
       phone: map['phone'] as String,
       isCoach: map['isCoach'] as bool,
+      photoUrl: map['photoUrl'] as String?,
       createdAt: map['createdAt'] as DateTime,
       updatedAt: map['updatedAt'] as DateTime,
     );
@@ -57,6 +59,9 @@ final class Profile {
 
   /// Fecha de la última actualización del perfil.
   final DateTime updatedAt;
+
+  /// URL de la fotografía de perfil.
+  final String? photoUrl;
 
   /// Indica si el nombre es válido.
   bool get hasValidFirstName {
@@ -86,6 +91,31 @@ final class Profile {
         hasValidPhone;
   }
 
+  /// Crea una copia del perfil modificando únicamente los campos indicados.
+  Profile copyWith({
+    String? uid,
+    String? email,
+    String? firstName,
+    String? lastName,
+    String? phone,
+    bool? isCoach,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    String? photoUrl,
+  }) {
+    return Profile(
+      uid: uid ?? this.uid,
+      email: email ?? this.email,
+      firstName: firstName ?? this.firstName,
+      lastName: lastName ?? this.lastName,
+      phone: phone ?? this.phone,
+      isCoach: isCoach ?? this.isCoach,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      photoUrl: photoUrl ?? this.photoUrl,
+    );
+  }
+
   /// Convierte el perfil a un mapa.
   Map<String, dynamic> toMap() {
     return {
@@ -95,6 +125,7 @@ final class Profile {
       'lastName': lastName,
       'phone': phone,
       'isCoach': isCoach,
+      'photoUrl': photoUrl,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
     };

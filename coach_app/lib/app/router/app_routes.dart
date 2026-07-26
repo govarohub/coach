@@ -21,6 +21,7 @@ final class AppRoutes {
   static const String emailVerification = '/email-verification';
   static const String disabledAccount = '/disabled-account';
   static const String selectProfile = '/select-profile';
+  static const String profile = '/profile';
 
   // Inicio
   static const String home = '/home';

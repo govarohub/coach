@@ -19,6 +19,7 @@ import '../../features/authentication/presentation/pages/forgot_password_page.da
 import '../../features/authentication/presentation/pages/email_verification_page.dart';
 import '../../features/authentication/presentation/pages/disabled_account_page.dart';
 import '../../core/auth/session_state.dart';
+import '../../features/profile/presentation/pages/profile_page.dart';
 
 final GoRouter appRouter = GoRouter(
   debugLogDiagnostics: true,
@@ -93,6 +94,11 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: AppRoutes.home,
       builder: (_, _) => const HomePage(),
+    ),
+
+    GoRoute(
+      path: AppRoutes.profile,
+      builder: (_, _) => const ProfilePage(),
     ),
 
     GoRoute(

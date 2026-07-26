@@ -10,7 +10,11 @@
 
 import 'package:flutter/foundation.dart';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../../domain/models/profile.dart';
+
+
 
 final class ProfileProvider extends ChangeNotifier {
   ProfileProvider();
@@ -42,3 +46,8 @@ final class ProfileProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
+
+final profileProvider =
+ChangeNotifierProvider<ProfileProvider>(
+      (ref) => ProfileProvider(),
+);

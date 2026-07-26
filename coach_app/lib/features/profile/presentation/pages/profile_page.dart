@@ -1,6 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
 
-final class ProfilePage extends StatelessWidget {
+import '../../../../core/auth/auth_provider.dart';
+import '../providers/profile_provider.dart';
+import '../../data/repositories/firebase_profile_repository.dart';
+import '../../data/services/profile_image_storage_service.dart';
+
+final class ProfilePage extends ConsumerWidget  {
   const ProfilePage({
     super.key,
     this.isCoach = false,
@@ -8,8 +15,66 @@ final class ProfilePage extends StatelessWidget {
 
   final bool isCoach;
 
+  Future<void> _changeProfilePhoto(
+      WidgetRef ref,
+      BuildContext context,
+      ) async {
+    final authService = ref.read(authServiceProvider);
+
+    final user = authService.currentUser;
+
+    if (user == null) {
+      return;
+    }
+
+    final image = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
+
+    if (image == null) {
+      return;
+    }
+
+    final storage = ProfileImageStorageService();
+
+    final photoUrl = await storage.uploadProfileImage(
+      uid: user.uid,
+      image: image,
+    );
+
+    final repository = FirebaseProfileRepository();
+
+    final provider = ref.read(profileProvider);
+
+    final profile = provider.profile;
+
+    if (profile == null) {
+      return;
+    }
+
+    final updated = profile.copyWith(
+      photoUrl: photoUrl,
+      updatedAt: DateTime.now(),
+    );
+
+    await repository.updateProfile(updated);
+
+    provider.setProfile(updated);
+
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Fotografía actualizada correctamente.',
+          ),
+        ),
+      );
+    }
+  }
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -21,6 +86,7 @@ final class ProfilePage extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: _ProfileContent(
             isCoach: isCoach,
+            onEditPhoto: () => _changeProfilePhoto(ref, context),
           ),
         ),
       ),
@@ -28,15 +94,22 @@ final class ProfilePage extends StatelessWidget {
   }
 }
 
-final class _ProfileContent extends StatelessWidget {
+final class _ProfileContent extends ConsumerWidget  {
   const _ProfileContent({
+    required this.onEditPhoto,
     this.isCoach = false,
   });
 
   final bool isCoach;
 
+  final VoidCallback onEditPhoto;
+
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref,) {
+    final provider = ref.watch(profileProvider);
+
+    final profile = provider.profile;
+
     return Card(
       elevation: 2,
       clipBehavior: Clip.antiAlias,
@@ -45,13 +118,16 @@ final class _ProfileContent extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const CircleAvatar(
-              radius: 40,
-              child: Icon(
-                Icons.person,
-                size: 40,
-              ),
+            CircleAvatar(
+              radius: 56,
+              backgroundImage: (profile?.photoUrl?.isNotEmpty ?? false)
+                  ? NetworkImage(profile!.photoUrl!)
+                  : null,
+              child: profile?.photoUrl == null
+                  ? const Icon(Icons.person, size: 56)
+                  : null,
             ),
+
             const SizedBox(height: 24),
             Text(
               isCoach ? 'Nombre del coach' : 'Nombre del usuario',
@@ -132,7 +208,7 @@ final class _ProfileContent extends StatelessWidget {
             SizedBox(
               width: double.infinity,
               child: FilledButton(
-                onPressed: null,
+                onPressed: onEditPhoto,
                 child: Text(
                   isCoach
                       ? 'Editar perfil del coach'
