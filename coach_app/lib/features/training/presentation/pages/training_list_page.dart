@@ -7,6 +7,8 @@ import '../../../../shared/widgets/base_scaffold.dart';
 import '../../domain/models/training.dart';
 import '../providers/training_provider.dart';
 
+import 'training_detail_page.dart';
+
 class TrainingListPage extends ConsumerWidget {
   const TrainingListPage({super.key});
 
@@ -46,8 +48,20 @@ class TrainingListPage extends ConsumerWidget {
             itemBuilder: (context, index) {
               final training = items[index];
 
-              return _TrainingCard(
-                training: training,
+              return InkWell(
+                borderRadius: BorderRadius.circular(12),
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => TrainingDetailPage(
+                        trainingId: training.id,
+                      ),
+                    ),
+                  );
+                },
+                child: _TrainingCard(
+                  training: training,
+                ),
               );
             },
           );
