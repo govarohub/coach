@@ -8,6 +8,7 @@ import '../../domain/models/training.dart';
 import '../providers/training_provider.dart';
 
 import 'training_detail_page.dart';
+import 'training_form_page.dart';
 
 class TrainingListPage extends ConsumerWidget {
   const TrainingListPage({super.key});
@@ -19,6 +20,18 @@ class TrainingListPage extends ConsumerWidget {
     return BaseScaffold(
       appBar: const BaseAppBar(
         title: 'Entrenamientos',
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => const TrainingFormPage(),
+            ),
+          );
+
+          ref.invalidate(trainingProvider);
+        },
+        child: const Icon(Icons.add),
       ),
       body: trainings.when(
         loading: () => const Center(
