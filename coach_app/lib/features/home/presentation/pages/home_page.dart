@@ -20,6 +20,8 @@ import '../../../calendar/presentation/pages/calendar_page.dart';
 import '../../../messages/presentation/pages/messages_page.dart';
 
 import '../providers/home_profile_provider.dart';
+import '../../../training/presentation/providers/training_provider.dart';
+
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -112,7 +114,7 @@ class _HomeContent extends ConsumerWidget {
 
                 const SizedBox(height: 24),
 
-                _buildNextTrainingCard(),
+                _buildNextTrainingCard(ref),
 
                 const SizedBox(height: 16),
 
@@ -205,24 +207,88 @@ class _HomeContent extends ConsumerWidget {
     );
   }
 
-  Widget _buildNextTrainingCard() {
-    return const Card(
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Próximo entrenamiento',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 12),
-            Text('Sin entrenamientos programados'),
-          ],
+  Widget _buildNextTrainingCard(WidgetRef ref) {
+    final trainings = ref.watch(trainingProvider);
+
+    return trainings.when(
+      loading: () => const Card(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Center(
+            child: CircularProgressIndicator(),
+          ),
         ),
       ),
+
+      error: (error, stackTrace) => const Card(
+        child: Padding(
+          padding: EdgeInsets.all(16),
+          child: Text(
+            'No fue posible cargar los entrenamientos.',
+          ),
+        ),
+      ),
+
+      data: (items) {
+        if (items.isEmpty) {
+          return const Card(
+            child: Padding(
+              padding: EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Próximo entrenamiento',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  SizedBox(height: 12),
+                  Text('Sin entrenamientos programados'),
+                ],
+              ),
+            ),
+          );
+        }
+
+        final training = items.first;
+
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Próximo entrenamiento',
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                Text(
+                  training.title,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+
+                const SizedBox(height: 4),
+
+                Text(training.description),
+
+                const SizedBox(height: 8),
+
+                Text(
+                  '${training.startDate.day}/${training.startDate.month}/${training.startDate.year}',
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
