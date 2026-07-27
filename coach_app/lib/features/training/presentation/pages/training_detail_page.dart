@@ -8,6 +8,8 @@ import '../../data/providers/training_service_provider.dart';
 import '../../domain/models/training.dart';
 
 import 'training_edit_page.dart';
+import '../widgets/delete_training_dialog.dart';
+import '../providers/training_provider.dart';
 
 final trainingDetailProvider =
 FutureProvider.family<Training?, String>((ref, trainingId) async {
@@ -50,6 +52,24 @@ class _TrainingDetailPageState
     );
   }
 
+  Future<void> _deleteTraining(
+      Training training,
+      ) async {
+    final deleted = await showDeleteTrainingDialog(
+      context: context,
+      ref: ref,
+      trainingId: training.id,
+    );
+
+    if (!mounted || !deleted) {
+      return;
+    }
+
+    ref.invalidate(trainingProvider);
+
+    Navigator.of(context).pop();
+  }
+
   @override
   Widget build(BuildContext context) {
     final training = ref.watch(
@@ -60,7 +80,7 @@ class _TrainingDetailPageState
       appBar: BaseAppBar(
         title: 'Detalle del entrenamiento',
         actions: [
-          if (training.hasValue && training.value != null)
+          if (training.hasValue && training.value != null) ...[
             IconButton(
               icon: const Icon(Icons.edit_outlined),
               tooltip: 'Editar',
@@ -68,6 +88,14 @@ class _TrainingDetailPageState
                 _editTraining(training.value!);
               },
             ),
+            IconButton(
+              icon: const Icon(Icons.delete_outline),
+              tooltip: 'Eliminar',
+              onPressed: () {
+                _deleteTraining(training.value!);
+              },
+            ),
+          ],
         ],
       ),
       body: training.when(
