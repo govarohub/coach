@@ -7,14 +7,15 @@ import '../../../../shared/widgets/base_scaffold.dart';
 import '../../data/providers/training_service_provider.dart';
 import '../../domain/models/training.dart';
 
+import 'training_edit_page.dart';
+
 final trainingDetailProvider =
 FutureProvider.family<Training?, String>((ref, trainingId) async {
   final service = ref.watch(trainingServiceProvider);
-
   return service.getTraining(trainingId);
 });
 
-class TrainingDetailPage extends ConsumerWidget {
+class TrainingDetailPage extends ConsumerStatefulWidget {
   const TrainingDetailPage({
     required this.trainingId,
     super.key,
@@ -23,26 +24,61 @@ class TrainingDetailPage extends ConsumerWidget {
   final String trainingId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TrainingDetailPage> createState() =>
+      _TrainingDetailPageState();
+}
+
+class _TrainingDetailPageState
+    extends ConsumerState<TrainingDetailPage> {
+  Future<void> _editTraining(
+      Training training,
+      ) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => TrainingEditPage(
+          training: training,
+        ),
+      ),
+    );
+
+    if (!mounted) {
+      return;
+    }
+
+    ref.invalidate(
+      trainingDetailProvider(widget.trainingId),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final training = ref.watch(
-      trainingDetailProvider(trainingId),
+      trainingDetailProvider(widget.trainingId),
     );
 
     return BaseScaffold(
-      appBar: const BaseAppBar(
+      appBar: BaseAppBar(
         title: 'Detalle del entrenamiento',
+        actions: [
+          if (training.hasValue && training.value != null)
+            IconButton(
+              icon: const Icon(Icons.edit_outlined),
+              tooltip: 'Editar',
+              onPressed: () {
+                _editTraining(training.value!);
+              },
+            ),
+        ],
       ),
       body: training.when(
         loading: () => const Center(
           child: CircularProgressIndicator(),
         ),
-
         error: (error, stackTrace) => const Center(
           child: Text(
             'No fue posible cargar el entrenamiento.',
           ),
         ),
-
         data: (training) {
           if (training == null) {
             return const Center(
