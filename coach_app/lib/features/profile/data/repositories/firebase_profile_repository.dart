@@ -34,6 +34,31 @@ final class FirebaseProfileRepository implements ProfileRepository {
       return null;
     }
 
+    // El documento pertenece a un usuario registrado,
+    // pero todavía no existe un perfil completo.
+    const requiredFields = <String>[
+      'uid',
+      'email',
+      'firstName',
+      'lastName',
+      'phone',
+      'isCoach',
+      'createdAt',
+      'updatedAt',
+    ];
+
+    for (final field in requiredFields) {
+      final value = data[field];
+
+      if (value == null) {
+        return null;
+      }
+
+      if (value is String && value.trim().isEmpty) {
+        return null;
+      }
+    }
+
     return Profile.fromMap(data);
   }
 
