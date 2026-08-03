@@ -18,12 +18,14 @@ class ProfileForm extends StatefulWidget {
     required this.profile,
     required this.onSave,
     super.key,
+    this.isLoading = false,
     this.buttonText = 'Guardar',
   });
 
   final Profile profile;
   final ValueChanged<Profile> onSave;
   final String buttonText;
+  final bool isLoading;
 
   @override
   State<ProfileForm> createState() => _ProfileFormState();
@@ -64,6 +66,10 @@ class _ProfileFormState extends State<ProfileForm> {
   }
 
   void _submit() {
+    if (widget.isLoading) {
+      return;
+    }
+
     final form = _formKey.currentState;
 
     if (form == null || !form.validate()) {
@@ -89,6 +95,7 @@ class _ProfileFormState extends State<ProfileForm> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           TextFormField(
+            enabled: !widget.isLoading,
             controller: _firstNameController,
             textCapitalization: TextCapitalization.words,
             decoration: const InputDecoration(
@@ -104,6 +111,7 @@ class _ProfileFormState extends State<ProfileForm> {
           ),
           const SizedBox(height: 16),
           TextFormField(
+            enabled: !widget.isLoading,
             controller: _lastNameController,
             textCapitalization: TextCapitalization.words,
             decoration: const InputDecoration(
@@ -119,6 +127,7 @@ class _ProfileFormState extends State<ProfileForm> {
           ),
           const SizedBox(height: 16),
           TextFormField(
+            enabled: !widget.isLoading,
             controller: _phoneController,
             keyboardType: TextInputType.phone,
             decoration: const InputDecoration(
@@ -139,6 +148,7 @@ class _ProfileFormState extends State<ProfileForm> {
           TextFormField(
             controller: _emailController,
             enabled: false,
+            readOnly: true,
             decoration: const InputDecoration(
               labelText: 'Correo electrónico',
               border: OutlineInputBorder(),
@@ -146,8 +156,18 @@ class _ProfileFormState extends State<ProfileForm> {
           ),
           const SizedBox(height: 24),
           FilledButton(
-            onPressed: _submit,
-            child: Text(widget.buttonText),
+            onPressed: widget.isLoading
+                ? null
+                : _submit,
+            child: widget.isLoading
+                ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+              ),
+            )
+                : Text(widget.buttonText),
           ),
         ],
       ),

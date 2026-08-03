@@ -4,10 +4,13 @@ import 'package:image_picker/image_picker.dart';
 
 import '../../../../core/auth/auth_provider.dart';
 import '../providers/profile_provider.dart';
-import '../../data/repositories/firebase_profile_repository.dart';
 import '../../data/services/profile_image_storage_service.dart';
 
-final class ProfilePage extends ConsumerWidget  {
+import '../../domain/models/profile.dart';
+import '../widgets/profile_form.dart';
+
+
+final class ProfilePage extends ConsumerStatefulWidget {
   const ProfilePage({
     super.key,
     this.isCoach = false,
@@ -15,8 +18,35 @@ final class ProfilePage extends ConsumerWidget  {
 
   final bool isCoach;
 
+  @override
+  ConsumerState<ProfilePage> createState() =>
+      _ProfilePageState();
+}
+
+final class _ProfilePageState
+    extends ConsumerState<ProfilePage> {
+
+  @override
+  void initState() {
+    super.initState();
+
+    Future.microtask(() async {
+      final authService =
+      ref.read(authServiceProvider);
+
+      final user = authService.currentUser;
+
+      if (user == null) {
+        return;
+      }
+
+      await ref
+          .read(profileProvider)
+          .loadProfile(user.uid);
+    });
+  }
+
   Future<void> _changeProfilePhoto(
-      WidgetRef ref,
       BuildContext context,
       ) async {
     final authService = ref.read(authServiceProvider);
@@ -43,12 +73,12 @@ final class ProfilePage extends ConsumerWidget  {
       image: image,
     );
 
-    final repository = FirebaseProfileRepository();
 
     final provider = ref.read(profileProvider);
 
     final profile = provider.profile;
 
+    // Todavía no existe un perfil creado.
     if (profile == null) {
       return;
     }
@@ -58,9 +88,7 @@ final class ProfilePage extends ConsumerWidget  {
       updatedAt: DateTime.now(),
     );
 
-    await repository.updateProfile(updated);
-
-    provider.setProfile(updated);
+    await provider.updatePhoto(updated);
 
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -74,19 +102,61 @@ final class ProfilePage extends ConsumerWidget  {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+
+    final provider = ref.watch(profileProvider);
+
+    if (provider.isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
+    final profile = provider.profile;
+
+    final user =
+        ref.read(authServiceProvider).currentUser;
+
+    if (user == null) {
+      return const Scaffold(
+        body: Center(
+          child: Text(
+            'No hay un usuario autenticado.',
+          ),
+        ),
+      );
+    }
+
+    final initialProfile = profile ??
+        Profile(
+          uid: user.uid,
+          email: user.email ?? '',
+          firstName: '',
+          lastName: '',
+          phone: '',
+          isCoach: widget.isCoach,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        );
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          isCoach ? 'Perfil del coach' : 'Mi perfil',
+          widget.isCoach
+              ? 'Perfil del coach'
+              : 'Mi perfil',
         ),
       ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: _ProfileContent(
-            isCoach: isCoach,
-            onEditPhoto: () => _changeProfilePhoto(ref, context),
+            profile: initialProfile,
+            isCoach: widget.isCoach,
+            isLoading: provider.isLoading,
+            onEditPhoto: () => _changeProfilePhoto(context),
           ),
         ),
       ),
@@ -95,20 +165,24 @@ final class ProfilePage extends ConsumerWidget  {
 }
 
 final class _ProfileContent extends ConsumerWidget  {
+
   const _ProfileContent({
+    required this.profile,
     required this.onEditPhoto,
+    required this.isLoading,
     this.isCoach = false,
   });
 
   final bool isCoach;
 
+  final bool isLoading;
+
+  final Profile? profile;
+
   final VoidCallback onEditPhoto;
 
   @override
   Widget build(BuildContext context, WidgetRef ref,) {
-    final provider = ref.watch(profileProvider);
-
-    final profile = provider.profile;
 
     return Card(
       elevation: 2,
@@ -118,36 +192,71 @@ final class _ProfileContent extends ConsumerWidget  {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            CircleAvatar(
-              radius: 56,
-              backgroundImage: (profile?.photoUrl?.isNotEmpty ?? false)
-                  ? NetworkImage(profile!.photoUrl!)
-                  : null,
-              child: profile?.photoUrl == null
-                  ? const Icon(Icons.person, size: 56)
-                  : null,
+            GestureDetector(
+              onTap: onEditPhoto,
+              child: Stack(
+                alignment: Alignment.bottomRight,
+                children: [
+                  CircleAvatar(
+                    radius: 56,
+                    backgroundImage: (profile?.photoUrl?.isNotEmpty ?? false)
+                        ? NetworkImage(profile!.photoUrl!)
+                        : null,
+                    child: profile?.photoUrl == null
+                        ? const Icon(Icons.person, size: 56)
+                        : null,
+                  ),
+                  const CircleAvatar(
+                    radius: 18,
+                    child: Icon(Icons.camera_alt),
+                  ),
+                ],
+              ),
             ),
 
             const SizedBox(height: 24),
-            Text(
-              isCoach ? 'Nombre del coach' : 'Nombre del usuario',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
+
+            Expanded(
+              child: SingleChildScrollView(
+                child: ProfileForm(
+                  profile: profile!,
+                  isLoading: isLoading,
+                  buttonText: 'Guardar cambios',
+                  onSave: (updatedProfile) async {
+                    try {
+                      final provider = ref.read(profileProvider);
+
+                      await provider.saveProfile(updatedProfile);
+
+                      if (!context.mounted) {
+                        return;
+                      }
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Perfil guardado correctamente.',
+                          ),
+                        ),
+                      );
+                    } catch (e) {
+                      if (!context.mounted) {
+                        return;
+                      }
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(
+                             'No fue posible guardar el perfil.\n$e',
+                          ),
+                        ),
+                      );
+                    }
+                  },
+                ),
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              isCoach
-                  ? 'coach@coachapp.com'
-                  : 'correo@dominio.com',
-            ),
-            const SizedBox(height: 4),
-            Text(
-              isCoach
-                  ? '+52 555 555 5555'
-                  : '+52 000 000 0000',
-            ),
+
 
             if (isCoach) ...[
               const SizedBox(height: 24),
@@ -204,18 +313,6 @@ final class _ProfileContent extends ConsumerWidget  {
                 textAlign: TextAlign.center,
               ),
             ],
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              child: FilledButton(
-                onPressed: onEditPhoto,
-                child: Text(
-                  isCoach
-                      ? 'Editar perfil del coach'
-                      : 'Editar perfil',
-                ),
-              ),
-            ),
           ],
         ),
       ),

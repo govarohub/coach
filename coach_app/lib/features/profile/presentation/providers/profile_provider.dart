@@ -1,23 +1,14 @@
-/*
-|--------------------------------------------------------------------------
-| Coach
-|--------------------------------------------------------------------------
-| Archivo: profile_provider.dart
-|--------------------------------------------------------------------------
-| Administra el estado del perfil del usuario.
-|--------------------------------------------------------------------------
-*/
-
 import 'package:flutter/foundation.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/repositories/firebase_profile_repository.dart';
 import '../../domain/models/profile.dart';
-
-
 
 final class ProfileProvider extends ChangeNotifier {
   ProfileProvider();
+
+  final FirebaseProfileRepository _repository =
+  FirebaseProfileRepository();
 
   Profile? _profile;
 
@@ -44,6 +35,51 @@ final class ProfileProvider extends ChangeNotifier {
 
     _isLoading = value;
     notifyListeners();
+  }
+
+  Future<void> saveProfile(Profile profile) async {
+    setLoading(true);
+
+    try {
+      if (_profile == null) {
+        await _repository.createProfile(profile);
+      } else {
+        await _repository.updateProfile(profile);
+      }
+
+      _profile = profile;
+
+      notifyListeners();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> updatePhoto(Profile profile) async {
+    setLoading(true);
+
+    try {
+      await _repository.updateProfile(profile);
+
+      _profile = profile;
+
+      notifyListeners();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  Future<void> loadProfile(String uid) async {
+    setLoading(true);
+
+    try {
+      final profile = await _repository.getProfile(uid);
+
+      _profile = profile;
+    } finally {
+      setLoading(false);
+    }
+
   }
 }
 
